@@ -25,37 +25,38 @@ async function editConfig(ctx) {
       console.log(` ${namespace} operation: ${op} deployment:${deploymentname} path ${path} to ${value}`);
 
       const patch = [{op,path,value}];
-      let api = k8sApi;
+      const name = ctx.deploymentname;
+      let api = appsApi;
 
       try {
-	 console.log("starting",deploymentname);
-	 console.log("namespace", namespace);
-         await api.patchNamespacedDeployment({"namespace": namespace, "body": patch});
+         console.log("starting",deploymentname);
+         console.log("namespace", namespace);
+         await api.patchNamespacedDeployment({"namespace": namespace, "name": name,"body": patch});
 
         console.log(`${op} ${path} ${value}`);
-      } catch (err) {
-        // If creation fails (e.g., resource already exists), attempt to patch it
-	console.log(err);
       }
-  } catch (err) {
+      catch(err) {
+        console.log(err);
+      }
+    }
+   catch (err) {
     console.error('Error editing config:', err.message);
   }
 }
 const CONTEXT = {};
-CONTEXT.namespace = "ns-dev";
-CONTEXT.deploymentname = "fusion-indexing";
+CONTEXT.namespace = "ns-test";
+CONTEXT.deploymentname = "ns-test-fusion-indexing";
 CONTEXT.op = "replace";
-CONTEXT.path = "/spec/";
-CONTEXT.value = "-Xmx4g";
+CONTEXT.path = "/spec/maxReplicas";
+CONTEXT.value = "2";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){ 
-										let a = process.argv[ele]; 
-										let idx = a.indexOf("=");
-										let n = a.substring(0,idx); 
-										console.log(n);
-										CONTEXT[n] = process.argv[ele].substring(idx+1);
-									   }});
+Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
+                                                                                let a = process.argv[ele];
+                                                                                let idx = a.indexOf("=");
+                                                                                let n = a.substring(0,idx);
+                                                                                console.log(n);
+                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
+                                                                           }});
 console.log(CONTEXT);
 // Usage
 editConfig(CONTEXT);
-
