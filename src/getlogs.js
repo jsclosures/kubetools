@@ -1,6 +1,29 @@
+const fs = require("fs");
 const k8s = require('@kubernetes/client-node');
+async function getPods(ctx) {
+    let result = [];
+    let namespace = ctx.namespace;
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
 
-async function getPodLogs(podName, namespace, containerName = null) {
+const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+
+    console.log(`Attempting to get pods in namesapce ${namespace}`);
+
+    try {
+        const res = await k8sApi.listNamespacedPod(
+                {namespace}
+        );
+        res.items.forEach((item) => result.push(item.metadata.name));
+        console.log(`${result}`);
+    } catch (err) {
+        console.error('Error getting pods:', err.body || err);
+    }
+    return( result );
+}
+
+
+async function getPodLogs(ctx,podName, namespace, containerName = null) {
     try {
         const kc = new k8s.KubeConfig();
         kc.loadFromDefault(); // Loads configuration from ~/.kube/config or environment variables
@@ -47,9 +70,13 @@ async function getPodLogs(podName, namespace, containerName = null) {
             });
         });
 	}
-
-        console.log(`Logs for pod ${podName} in namespace ${namespace}:`);
-        console.log(logs);
+        if( ctx.filename ){
+            fs.writeFileSync(podName + '.txt', logs, 'utf8');
+	}
+        else {
+           console.log(`Logs for pod ${podName} in namespace ${namespace}:`);
+           console.log(logs);
+	}
 
     } catch (err) {
         console.error('Error fetching pod logs:', err);
@@ -73,10 +100,21 @@ Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if(
 
 // Optional: If your pod has multiple containers, specify the container name
 // const myContainerName = 'my-app-container'; 
-if( CONTEXT.containername ){
-     getPodLogs(CONTEXT.podname, CONTEXT.namespace,CONTEXT.containername); 
+(async () => {
+if( CONTEXT.podname == "*" ){
+    let pods = await getPods(CONTEXT);
+	console.log(pods);
+    if( pods ){
+       pods.forEach((item) => getPodLogs(CONTEXT,item,CONTEXT.namespace,null));     
+    }
+    else {
+	    console.log("no pods",CONTEXT);
+   }
+} else if( CONTEXT.containername ){
+     getPodLogs(CONTEXT,CONTEXT.podname, CONTEXT.namespace,CONTEXT.containername); 
 }
 else {
-     getPodLogs(CONTEXT.podname, CONTEXT.namespace); 
+     getPodLogs(CONTEXT,CONTEXT.podname, CONTEXT.namespace); 
 }
+})();
 // getPodLogs(myPodName, myNamespace, myContainerName); // For multi-container pods

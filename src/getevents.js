@@ -1,8 +1,6 @@
 const k8s = require('@kubernetes/client-node');
 
-async function getKubernetesEvents(ctx) {
-  let namespace = ctx.namespace;
-  
+async function getKubernetesEvents(namespace) {
   try {
     console.log("using namespace",namespace);
     const kc = new k8s.KubeConfig();
@@ -28,16 +26,13 @@ async function getKubernetesEvents(ctx) {
   }
 }
 
-const CONTEXT = {};
-CONTEXT.namespace = "ns-dev";
+let namespace = 'ns-test';
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
+if( process.argv.length > 2 ){
+  namespace = process.argv[2];
+}
 
-// Run the function
-getEvents(CONTEXT);
+console.log("namespace",namespace);
+
+
+getKubernetesEvents(namespace);

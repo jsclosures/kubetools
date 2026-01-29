@@ -11,10 +11,13 @@ const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const appsApi = kc.makeApiClient(k8s.AppsV1Api);
 const autoscalingV2Api = kc.makeApiClient(k8s.AutoscalingV2Api);
 
-
-async function applyYaml(ctx) {
-  const filePath = CONTEXT.file;
-  const namespace = CONTEXT.namespace
+/**
+ * Applies a Kubernetes resource definition from a YAML file.
+ * This simulates the behavior of 'kubectl apply -f'.
+ * @param {string} filePath The path to the YAML file.
+ * @param {string} namespace The Kubernetes namespace (e.g., 'default').
+ */
+async function applyYaml(filePath, namespace = 'default') {
   try {
     // Read and parse the YAML file
     const specString = fs.readFileSync(filePath, 'utf8');
@@ -103,5 +106,5 @@ Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if(
 									   }});
 console.log(CONTEXT);
 // Usage
-applyYaml(CONTEXXT);
+applyYaml(CONTEXT.file,CONTEXT.namespace);
 

@@ -1,0 +1,27 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ns-test-fusion-indexing
+  labels:
+   
+    helm.sh/chart: "fusion-indexing-4.1.4"
+    app.kubernetes.io/name: "fusion-indexing"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/instance: "ns-test"
+    app.kubernetes.io/version: "5"
+    app.kubernetes.io/component: "fusion-indexing"
+    app.kubernetes.io/part-of: "fusion"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ns-test-fusion-indexing
+  minReplicas: 2
+  maxReplicas: 4
+  metrics:
+    - resource:
+        name: cpu
+        target:
+          averageUtilization: 90
+          type: Utilization
+      type: Resource

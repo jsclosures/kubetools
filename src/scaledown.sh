@@ -1,0 +1,41 @@
+node scaledeployment.js namespace=$1 deploymentname=init-tls-secret replicas=0
+node scaledeployment.js namespace=$1 deploymentname=kuberay-operator replicas=0
+node scaledeployment.js namespace=$1 deploymentname=milvus-writable replicas=0
+node scaledeployment.js namespace=$1 deploymentname=ml-model-service replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-admin-ui replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-ambassador replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-api-gateway replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-apps-manager replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-argo-server replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-argo-workflow-controller replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-auth-ui replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-connector-plugin-jdbc replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-connector-plugin-web-v2 replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-connectors replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-connectors-backend replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-fusion-admin replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-fusion-indexing replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-insights replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-job-config replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-job-launcher replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-job-rest-server replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-kafka-exporter replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-lwai-gateway replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-mysql replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-pm-ui replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-query-pipeline replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-rules-ui replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-solr-exporter replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-templating replicas=0
+node scaledeployment.js namespace=$1 deploymentname=$1-webapps replicas=0
+node scaledeployment.js namespace=$1 deploymentname=seldon-controller-manager replicas=0
+node scaledeployment.js namespace=$1 deploymentname=selenium-hub replicas=0
+node scaledeployment.js namespace=$1 deploymentname=selenium-node-chrome replicas=0
+
+
+
+node scaledeployment.js namespace=$1 statefulsetname=$1-async-parsing replicas=0
+node scaledeployment.js namespace=$1 statefulsetname=$1-classic-rest-service replicas=0
+node scaledeployment.js namespace=$1 statefulsetname=$1-kafka replicas=0
+node scaledeployment.js namespace=$1 statefulsetname=$1-solr replicas=0
+node scaledeployment.js namespace=$1 statefulsetname=$1-zookeeper replicas=0

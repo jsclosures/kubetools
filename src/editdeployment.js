@@ -29,14 +29,14 @@ async function editConfig(ctx) {
       let api = appsApi;
 
       try {
-         console.log("starting",deploymentname);
-         console.log("namespace", namespace);
+	 console.log("starting",deploymentname);
+	 console.log("namespace", namespace);
          await api.patchNamespacedDeployment({"namespace": namespace, "name": name,"body": patch});
 
         console.log(`${op} ${path} ${value}`);
-      }
+      } 
       catch(err) {
-        console.log(err);
+	console.log(err);
       }
     }
    catch (err) {
@@ -45,18 +45,24 @@ async function editConfig(ctx) {
 }
 const CONTEXT = {};
 CONTEXT.namespace = "ns-test";
-CONTEXT.deploymentname = "ns-test-fusion-indexing";
+//CONTEXT.deploymentname = "selenium-node-chrome";
+CONTEXT.deploymentname = "ns-test-connectors";
 CONTEXT.op = "replace";
-CONTEXT.path = "/spec/maxReplicas";
-CONTEXT.value = "2";
+//CONTEXT.path = "/spec/maxReplicas";
+//CONTEXT.path = "/spec/template/spec/containers/0/env/4/value";
+//CONTEXT.value = "SE_NODE_SESSION_TIMEOUT 300";
+//CONTEXT.value = "300";
+CONTEXT.path = "/spec/template/spec/containers/0/env/4/value";
+CONTEXT.value = "-Dcom.lucidworks.connectors.client.jobExpirationDurationMs=1000000 -Dspring.cloud.kubernetes.secrets.paths=/etc/secrets -XX:+ExitOnOutOfMemoryError -XX:InitialRAMPercentage=40.0 -XX:MaxRAMPercentage=75.0 -Xss256k -Dhttp.maxConnections=1000 -Dlogging.config=classpath:logback-kube.xml";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
+Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){ 
+										let a = process.argv[ele]; 
+										let idx = a.indexOf("=");
+										let n = a.substring(0,idx); 
+										console.log(n);
+										CONTEXT[n] = process.argv[ele].substring(idx+1);
+									   }});
 console.log(CONTEXT);
 // Usage
 editConfig(CONTEXT);
+
