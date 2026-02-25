@@ -16,22 +16,22 @@ const appsApi = kc.makeApiClient(k8s.AppsV1Api);
  */
 async function editConfig(ctx) {
   try {
-      if (!ctx || !ctx.namespace || !ctx.deploymentname || !ctx.path || !ctx.value) {
-        console.log('Skipping invalid context. namespace=x deploymentname=d path=p value=value');
+      if (!ctx || !ctx.namespace || !ctx.pvcname || !ctx.path || !ctx.value) {
+        console.log('Skipping invalid context. namespace=x pvcname=d path=p value=value');
         return;
       }
 
-      const { namespace,deploymentname,path,op,value } = ctx;
-      console.log(` ${namespace} operation: ${op} deployment:${deploymentname} path ${path} to ${value}`);
+      const { namespace,pvcname,path,op,value } = ctx;
+      console.log(` ${namespace} operation: ${op} statefulset:${pvcname} path ${path} to ${value}`);
 
       const patch = [{op,path,value}];
-      const name = ctx.deploymentname;
-      let api = appsApi;
+      const name = ctx.pvcname;
+      let api = k8sApi;
 
       try {
-	 console.log("starting",deploymentname);
+	 console.log("starting",pvcname);
 	 console.log("namespace", namespace);
-         await api.patchNamespacedDeployment({"namespace": namespace, "name": name,"body": patch});
+         await api.patchNamespacedPersistentVolumeClaim({"namespace": namespace, "name": name,"body": patch});
 
         console.log(`${op} ${path} ${value}`);
       } 
@@ -45,15 +45,10 @@ async function editConfig(ctx) {
 }
 const CONTEXT = {};
 CONTEXT.namespace = "ns-test";
-//CONTEXT.deploymentname = "selenium-node-chrome";
-CONTEXT.deploymentname = "ns-test-connectors";
+CONTEXT.pvcname = "data-ns-test-kafka-2";
 CONTEXT.op = "replace";
-//CONTEXT.path = "/spec/maxReplicas";
-//CONTEXT.path = "/spec/template/spec/containers/0/env/4/value";
-//CONTEXT.value = "SE_NODE_SESSION_TIMEOUT 300";
-//CONTEXT.value = "300";
-CONTEXT.path = "/spec/template/spec/containers/0/env/4/value";
-CONTEXT.value = "-Dcom.lucidworks.connectors.client.jobExpirationDurationMs=1000000 -Dspring.cloud.kubernetes.secrets.paths=/etc/secrets -XX:+ExitOnOutOfMemoryError -XX:InitialRAMPercentage=40.0 -XX:MaxRAMPercentage=75.0 -Xss256k -Dhttp.maxConnections=1000 -Dlogging.config=classpath:logback-kube.xml";
+CONTEXT.path = "/spec/resources/requests/storage";
+CONTEXT.value = "150Gi";
 
 Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){ 
 										let a = process.argv[ele]; 

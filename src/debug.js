@@ -22,7 +22,7 @@ async function doDebug(ctx){
     const ephemeralContainer = {
       name: ctx.debugcontainername,
       image: ctx.debugimage,
-      command: ['sh', '-c', 'sleep infinity'], // Command to keep container running
+      command: ['sh','-c', 'sleep infinity'], // Command to keep container running
       // Optionally share process namespace like 'kubectl debug --share-processes'
       // targetContainerName: 'my-app-container' // Target container name if needed
     };

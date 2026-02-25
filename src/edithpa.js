@@ -28,21 +28,27 @@ const patch = [
     {
         "op": "replace",
         "path": "/spec/maxReplicas",
-        "value": 2
+        "value": 2 
     }
 ];
 if( CONTEXT.minReplicas )
-        patch[0].value = parseInt(CONTEXT.minReplicas);
+	patch[0].value = parseInt(CONTEXT.minReplicas);
 if( CONTEXT.maxReplicas )
-        patch[1].value = parseInt(CONTEXT.maxReplicas);
+	patch[1].value = parseInt(CONTEXT.maxReplicas);
 // Use 'application/json-patch+json' for RFC 6902 JSON Patch
 k8sApi.patchNamespacedHorizontalPodAutoscaler(
-        { name: CONTEXT.hpaName,
+	{ name: CONTEXT.hpaName,
           namespace: CONTEXT.namespace,
           body: patch},
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
     { headers: { "Content-Type": "application/json-patch+json" } }
 ).then((response) => {
     console.log('HPA patched successfully');
 }).catch((err) => {
     console.error('Error patching HPA:', err);
 });
+
