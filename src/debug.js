@@ -22,9 +22,8 @@ async function doDebug(ctx){
     const ephemeralContainer = {
       name: ctx.debugcontainername,
       image: ctx.debugimage,
-      command: ['sh','-c', 'sleep infinity'], // Command to keep container running
-      // Optionally share process namespace like 'kubectl debug --share-processes'
-      // targetContainerName: 'my-app-container' // Target container name if needed
+      command: ['sh','-c', 'sleep infinity'], 
+	  targetContainerName: ctx.targetcontainername
     };
 
     pod.spec.ephemeralContainers.push(ephemeralContainer);
@@ -36,7 +35,7 @@ async function doDebug(ctx){
 
     console.log(`Successfully added ephemeral container '${ctx.debugimage}' to ${ctx.podname}.`);
     console.log('You can now attach to it using:');
-    console.log(`node exec.js namespace=${ctx.namespace} podname=${ctx.podname} containername=${ctx.debugcontainername}`);
+    console.log(`node exec.js namespace=${ctx.namespace} podname=${ctx.podname} containername=${ctx.targetcontainername}`);
 
   } catch (err) {
     console.error('Error debugging pod:', err.body || err);
@@ -55,6 +54,7 @@ CONTEXT.namespace = "ns-test";
 CONTEXT.podname = CONTEXT.namespace + "-solr-0";
 CONTEXT.debugimage = "busybox";
 CONTEXT.debugcontainername = "debugger";
+CONTEXT.targetcontainername = "debugger";
 
 Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
                                                                                 let a = process.argv[ele];
