@@ -22,6 +22,8 @@ async function doDebug(ctx){
     const ephemeralContainer = {
       name: ctx.debugcontainername,
       image: ctx.debugimage,
+      tty: true,
+      ssh: true,
       command: ['sh','-c', 'sleep infinity'], 
 	  targetContainerName: ctx.targetcontainername
     };
