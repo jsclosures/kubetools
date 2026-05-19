@@ -23,9 +23,9 @@ async function doDebug(ctx){
       name: ctx.debugcontainername,
       image: ctx.debugimage,
       tty: true,
-      ssh: true,
+      stdin: true,
       command: ['sh','-c', 'sleep infinity'], 
-	  targetContainerName: ctx.targetcontainername
+	    targetContainerName: ctx.targetcontainername
     };
 
     pod.spec.ephemeralContainers.push(ephemeralContainer);
