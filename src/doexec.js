@@ -1,6 +1,18 @@
 //
 // Execute commands non-interactively in a pod
 //
+const { init } = require("./lib");
+
+init({
+  name: "doexec.js",
+  description: "Example: run a command non-interactively in a pod. NOTE: this is a hard-coded sample built on the legacy 'kubernetes-client' library; edit the namespace and pod names in the source before running.",
+  context: {},
+  options: {},
+  examples: [
+    "node src/doexec.js"
+  ]
+});
+
 const Client = require('kubernetes-client').Client
 const config = require('kubernetes-client').config
 

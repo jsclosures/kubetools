@@ -1,6 +1,8 @@
 # kubetools — Documentation
 
-A collection of Node.js scripts that replicate the most common `kubectl` operations via the official `@kubernetes/client-node` SDK. Each script is self-contained, reads your local kubeconfig automatically, and accepts parameters from the command line.
+A collection of Node.js scripts that replicate the most common `kubectl` operations via the official `@kubernetes/client-node` SDK. Each script reads your local kubeconfig automatically and accepts parameters from the command line. All scripts share a common helper (`src/lib.js`) that gives them a uniform `key=value` argument convention, environment-variable support, and a `--help` message.
+
+Run `node src/index.js` to print a catalog of every available script.
 
 ---
 
@@ -54,7 +56,13 @@ All scripts share the same command-line argument convention. Arguments are passe
 node <script>.js key1=value1 key2=value2
 ```
 
-Each script defines a `CONTEXT` object with default values. Any `key=value` pair on the command line **overrides** the matching key in `CONTEXT`. This means you can always run a script without arguments to use its built-in defaults, or supply only the parameters you want to change.
+Each script defines a `CONTEXT` object with default values. A value is resolved with the following precedence, lowest to highest:
+
+1. **Built-in defaults** — the values baked into the script's `CONTEXT`.
+2. **Environment variables** — any environment variable whose name matches a `CONTEXT` key overrides that default.
+3. **Command-line `key=value`** — anything passed on the command line overrides both of the above.
+
+This means you can run a script with no arguments to use its defaults, set environment variables for values you reuse often, and override anything per-invocation on the command line.
 
 **Example:**
 
@@ -62,11 +70,22 @@ Each script defines a `CONTEXT` object with default values. Any `key=value` pair
 # Uses defaults (namespace=ns-dev, mode=default)
 node src/getpods.js
 
-# Override just the namespace
-node src/getpods.js namespace=production
+# Set the namespace via environment variable
+namespace=staging node src/getpods.js
+
+# Command-line value wins over the environment variable (uses production)
+namespace=staging node src/getpods.js namespace=production
 
 # Override multiple values
 node src/getpods.js namespace=production mode=verbose
+```
+
+### Help
+
+Every script accepts `-h`, `--help`, or `help` and prints a usage message describing its options, defaults, and examples — then exits without contacting the cluster:
+
+```bash
+node src/getpods.js --help
 ```
 
 > **Note:** Values that contain spaces or special characters should be quoted in your shell, e.g. `value="my long string"`. The `editdeployment.js` script additionally strips leading/trailing double-quotes from values automatically.
@@ -281,15 +300,11 @@ node src/exec.js \
 
 Lists all Kubernetes events in a given namespace, printing the type, reason, message, and the object the event relates to.
 
-**Arguments:**
+**Default context values:**
 
-Unlike other scripts, `getevents.js` takes a single positional argument (not a `key=value` pair):
-
-```bash
-node src/getevents.js <namespace>
-```
-
-**Default:** `ns-test`
+| Key | Default |
+|---|---|
+| `namespace` | `ns-test` |
 
 **Usage:**
 
@@ -297,8 +312,8 @@ node src/getevents.js <namespace>
 # Use default namespace
 node src/getevents.js
 
-# Specify namespace positionally
-node src/getevents.js production
+# Specify namespace
+node src/getevents.js namespace=production
 ```
 
 **Example output:**
@@ -428,7 +443,7 @@ node src/exec.js namespace=production podname=my-api-pod-abc123
 
 ```bash
 # Step 1 — check recent events to understand why
-node src/getevents.js production
+node src/getevents.js namespace=production
 
 # Step 2 — inject a debug container
 node debug.js namespace=production podname=my-api-pod-abc123 debugimage=busybox

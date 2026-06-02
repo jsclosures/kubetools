@@ -36,13 +36,23 @@ const CONTEXT = {};
 CONTEXT.namespace = "ns-dev";
 CONTEXT.mode = "default";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "getpods.js",
+        "description": "List pods in a namespace.",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "Namespace to query.",
+            "mode": "\"default\" prints names; anything else prints full JSON."
+        },
+        "examples": [
+            "node src/getpods.js namespace=ns-dev",
+            "node src/getpods.js namespace=ns-dev mode=json"
+        ]
+    };
+
+init(USAGE);
 
 // Run the function
 getPods(CONTEXT);

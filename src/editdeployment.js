@@ -55,17 +55,25 @@ CONTEXT.op = "replace";
 CONTEXT.path = "/spec/template/spec/containers/0/env/4/value";
 CONTEXT.value = "-Dcom.lucidworks.connectors.client.jobExpirationDurationMs=1000000 -Dspring.cloud.kubernetes.secrets.paths=/etc/secrets -XX:+ExitOnOutOfMemoryError -XX:InitialRAMPercentage=40.0 -XX:MaxRAMPercentage=75.0 -Xss256k -Dhttp.maxConnections=1000 -Dlogging.config=classpath:logback-kube.xml";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){ 
-										let a = process.argv[ele]; 
-										let idx = a.indexOf("=");
-										let n = a.substring(0,idx); 
-										console.log(n);
-										CONTEXT[n] = process.argv[ele].substring(idx+1);
-										if( CONTEXT[n].startsWith("\"") ){
-											CONTEXT[n] = CONTEXT[n].substring(1,CONTEXT[n].length-2);
-										}
-									   }});
-console.log(CONTEXT);
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "editdeployment.js",
+        "description": "Patch a Deployment with a single JSON Patch operation.",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "Deployment namespace.",
+            "deploymentname": "Deployment to patch.",
+            "op": "JSON Patch op (e.g. replace, add, remove).",
+            "path": "JSON Patch path (e.g. /spec/replicas).",
+            "value": "New value for the path."
+        },
+        "examples": [
+            "node src/editdeployment.js deploymentname=my-deploy path=/spec/replicas value=3 op=replace"
+        ]
+    };
+
+init(USAGE);
 // Usage
 editConfig(CONTEXT);
 

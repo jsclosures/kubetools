@@ -38,13 +38,23 @@ CONTEXT.namespace = "ns-dev";
 CONTEXT.mode = "";
 CONTEXT.podname= "";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "getpodevents.js",
+        "description": "List events in a namespace (scoped around a pod).",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "Namespace to query.",
+            "podname": "Pod name for context.",
+            "mode": "\"default\" prints the name; anything else prints full JSON."
+        },
+        "examples": [
+            "node src/getpodevents.js namespace=ns-dev podname=my-pod-0"
+        ]
+    };
+
+init(USAGE);
 
 // Run the function
 getPods(CONTEXT);

@@ -58,13 +58,24 @@ CONTEXT.debugimage = "busybox";
 CONTEXT.debugcontainername = "debugger";
 CONTEXT.targetcontainername = "debugger";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
-console.log(CONTEXT);
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "debug.js",
+        "description": "Attach an ephemeral debug container to a running pod.",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "Pod namespace.",
+            "podname": "Target pod name.",
+            "debugimage": "Image to run as the debug container.",
+            "debugcontainername": "Name for the ephemeral debug container.",
+            "targetcontainername": "Existing container to share process namespace with."
+        },
+        "examples": [
+            "node src/debug.js namespace=ns-dev podname=my-pod-0"
+        ]
+    };
+
+init(USAGE);
 
 doDebug(CONTEXT);

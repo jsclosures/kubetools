@@ -97,14 +97,22 @@ const CONTEXT = {};
 CONTEXT.namespace = "ns-dev";
 CONTEXT.file = "chrome-deployment.yaml";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){ 
-										let a = process.argv[ele]; 
-										let idx = a.indexOf("=");
-										let n = a.substring(0,idx); 
-										console.log(n);
-										CONTEXT[n] = process.argv[ele].substring(idx+1);
-									   }});
-console.log(CONTEXT);
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "apply.js",
+        "description": "Apply (replace) a Kubernetes resource from a YAML manifest file.",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "Namespace to apply into.",
+            "file": "Path to the YAML manifest to apply."
+        },
+        "examples": [
+            "node src/apply.js file=src/yaml/deploy.yaml namespace=ns-dev"
+        ]
+    };
+
+init(USAGE);
 // Usage
 applyYaml(CONTEXT.file,CONTEXT.namespace);
 

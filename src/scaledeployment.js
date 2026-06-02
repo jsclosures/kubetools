@@ -53,13 +53,25 @@ CONTEXT.deploymentname = "";
 CONTEXT.statefulsetname = "";
 CONTEXT.replicas = "";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "scaledeployment.js",
+        "description": "Scale a Deployment or StatefulSet to a replica count.",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "Resource namespace.",
+            "deploymentname": "Deployment to scale (leave empty to scale a StatefulSet).",
+            "statefulsetname": "StatefulSet to scale (takes precedence when set).",
+            "replicas": "Desired replica count."
+        },
+        "examples": [
+            "node src/scaledeployment.js deploymentname=my-deploy replicas=3",
+            "node src/scaledeployment.js statefulsetname=my-sts replicas=5"
+        ]
+    };
+
+init(USAGE);
 
 // Run the function
 scaleDeployment(CONTEXT);

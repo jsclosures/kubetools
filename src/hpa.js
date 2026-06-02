@@ -44,14 +44,22 @@ const CONTEXT = {};
 CONTEXT.namespace = "ns-test";
 CONTEXT.hpaname = "ns-test-fusion-indexing";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
-console.log(CONTEXT);
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "hpa.js",
+        "description": "Describe a HorizontalPodAutoscaler (targets, min/max, metrics, status).",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "HPA namespace.",
+            "hpaname": "HPA name to describe."
+        },
+        "examples": [
+            "node src/hpa.js namespace=ns-dev hpaname=my-hpa"
+        ]
+    };
+
+init(USAGE);
 
 describeHpa(CONTEXT);
 

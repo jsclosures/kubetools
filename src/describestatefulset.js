@@ -38,13 +38,23 @@ CONTEXT.namespace = "ns-dev";
 CONTEXT.mode = "";
 CONTEXT.statefulsetname= "";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "describestatefulset.js",
+        "description": "Describe (read) a single StatefulSet.",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "StatefulSet namespace.",
+            "statefulsetname": "StatefulSet name to read.",
+            "mode": "\"default\" prints the name; anything else prints full JSON."
+        },
+        "examples": [
+            "node src/describestatefulset.js namespace=ns-dev statefulsetname=my-sts mode=json"
+        ]
+    };
+
+init(USAGE);
 
 // Run the function
 getStatefulSet(CONTEXT);

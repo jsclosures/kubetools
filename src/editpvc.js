@@ -50,17 +50,25 @@ CONTEXT.op = "replace";
 CONTEXT.path = "/spec/resources/requests/storage";
 CONTEXT.value = "150Gi";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){ 
-										let a = process.argv[ele]; 
-										let idx = a.indexOf("=");
-										let n = a.substring(0,idx); 
-										console.log(n);
-										CONTEXT[n] = process.argv[ele].substring(idx+1);
-										if( CONTEXT[n].startsWith("\"") ){
-											CONTEXT[n] = CONTEXT[n].substring(1,CONTEXT[n].length-2);
-										}
-									   }});
-console.log(CONTEXT);
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "editpvc.js",
+        "description": "Patch a PersistentVolumeClaim with a single JSON Patch operation (e.g. grow storage).",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "PVC namespace.",
+            "pvcname": "PVC to patch.",
+            "op": "JSON Patch op.",
+            "path": "JSON Patch path.",
+            "value": "New value for the path."
+        },
+        "examples": [
+            "node src/editpvc.js pvcname=data-my-sts-0 path=/spec/resources/requests/storage value=150Gi"
+        ]
+    };
+
+init(USAGE);
 // Usage
 editConfig(CONTEXT);
 

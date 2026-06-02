@@ -38,13 +38,23 @@ CONTEXT.namespace = "ns-dev";
 CONTEXT.mode = "";
 CONTEXT.podname= "";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "describe.js",
+        "description": "Describe (read) a single Deployment.",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "Deployment namespace.",
+            "podname": "Deployment name to read.",
+            "mode": "\"default\" prints the name; anything else prints full JSON."
+        },
+        "examples": [
+            "node src/describe.js namespace=ns-dev podname=my-deploy mode=json"
+        ]
+    };
+
+init(USAGE);
 
 // Run the function
 getPods(CONTEXT);

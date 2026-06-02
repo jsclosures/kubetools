@@ -40,13 +40,23 @@ CONTEXT.namespace = "ns-dev";
 CONTEXT.mode = "default";
 CONTEXT.replicas = "";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "getdeployments.js",
+        "description": "List Deployments in a namespace.",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "Namespace to query.",
+            "mode": "\"default\" prints names; anything else prints full JSON.",
+            "replicas": "Reserved/optional filter."
+        },
+        "examples": [
+            "node src/getdeployments.js namespace=ns-dev"
+        ]
+    };
+
+init(USAGE);
 
 
 getDeployments(CONTEXT)

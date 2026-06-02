@@ -50,17 +50,25 @@ CONTEXT.op = "replace";
 CONTEXT.path = "/spec/volumeClaimTemplates/0/spec/resources/requests/storage";
 CONTEXT.value = "100Gi";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){ 
-										let a = process.argv[ele]; 
-										let idx = a.indexOf("=");
-										let n = a.substring(0,idx); 
-										console.log(n);
-										CONTEXT[n] = process.argv[ele].substring(idx+1);
-										if( CONTEXT[n].startsWith("\"") ){
-											CONTEXT[n] = CONTEXT[n].substring(1,CONTEXT[n].length-2);
-										}
-									   }});
-console.log(CONTEXT);
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "editstatefulset.js",
+        "description": "Patch a StatefulSet with a single JSON Patch operation.",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "StatefulSet namespace.",
+            "statefulsetname": "StatefulSet to patch.",
+            "op": "JSON Patch op.",
+            "path": "JSON Patch path.",
+            "value": "New value for the path."
+        },
+        "examples": [
+            "node src/editstatefulset.js statefulsetname=my-sts path=/spec/replicas value=3"
+        ]
+    };
+
+init(USAGE);
 // Usage
 editConfig(CONTEXT);
 

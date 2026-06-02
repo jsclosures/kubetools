@@ -1,4 +1,5 @@
 const k8s = require('@kubernetes/client-node');
+const { init } = require("./lib");
 
 async function getKubernetesEvents(namespace) {
   try {
@@ -26,13 +27,23 @@ async function getKubernetesEvents(namespace) {
   }
 }
 
-let namespace = 'ns-test';
+const CONTEXT = {};
+CONTEXT.namespace = "ns-test";
 
-if( process.argv.length > 2 ){
-  namespace = process.argv[2];
-}
+const USAGE = {
+    name: "getevents.js",
+    description: "List events in a namespace.",
+    context: CONTEXT,
+    options: {
+        namespace: "Namespace to query."
+    },
+    examples: [
+        "node src/getevents.js namespace=ns-dev"
+    ]
+};
 
-console.log("namespace",namespace);
+init(USAGE);
 
+console.log("namespace", CONTEXT.namespace);
 
-getKubernetesEvents(namespace);
+getKubernetesEvents(CONTEXT.namespace);

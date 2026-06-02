@@ -90,13 +90,24 @@ CONTEXT.podname = "";
 CONTEXT.containername = "";
 CONTEXT.file = "out.log";
 
-Object.keys(process.argv).forEach((ele) => { console.log(process.argv[ele]); if( ele > 1 ){
-                                                                                let a = process.argv[ele];
-                                                                                let idx = a.indexOf("=");
-                                                                                let n = a.substring(0,idx);
-                                                                                console.log(n);
-                                                                                CONTEXT[n] = process.argv[ele].substring(idx+1);
-                                                                           }});
+const { init } = require("./lib");
+
+const USAGE = {
+        "name": "getlogs.js",
+        "description": "Fetch logs from a pod (or all pods with podname=*) and write them to a file.",
+        "context": CONTEXT,
+        "options": {
+            "namespace": "Namespace to query.",
+            "podname": "Pod name, or * for all pods in the namespace.",
+            "containername": "Container to read logs from.",
+            "file": "Output file for the logs."
+        },
+        "examples": [
+            "node src/getlogs.js namespace=ns-dev podname=my-pod-0 file=out.log"
+        ]
+    };
+
+init(USAGE);
 
 // Optional: If your pod has multiple containers, specify the container name
 // const myContainerName = 'my-app-container'; 
