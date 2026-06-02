@@ -6,6 +6,7 @@ async function getStatefulSets(ctx) {
     // Load the Kubernetes configuration from the default location (~/.kube/config)
     const kc = new k8s.KubeConfig();
     kc.loadFromDefault();
+    require("./lib").skipTlsVerify(kc);
 
     // Create an API client for the Apps V1 API, which manages StatefulSets
     const appsV1Api = kc.makeApiClient(k8s.AppsV1Api);

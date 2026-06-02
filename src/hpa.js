@@ -2,6 +2,7 @@ const k8s = require('@kubernetes/client-node');
 
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault(); // Or from ~/.kube/config
+require("./lib").skipTlsVerify(kc);
 
 // Use CoreV1Api to get metrics if needed (requires metrics-server)
 const coreV1Api = kc.makeApiClient(k8s.CoreV1Api);

@@ -2,6 +2,7 @@ const k8s = require('@kubernetes/client-node');
 
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
+require("./lib").skipTlsVerify(kc);
 
 const k8sApi = kc.makeApiClient(k8s.AutoscalingV2Api);
 const CONTEXT = {};

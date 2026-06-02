@@ -88,6 +88,18 @@ Every script accepts `-h`, `--help`, or `help` and prints a usage message descri
 node src/getpods.js --help
 ```
 
+### TLS verification
+
+By default, **these scripts skip TLS certificate verification** for the cluster. After loading your kubeconfig, each script calls a shared helper that sets `skipTLSVerify` on every cluster. This makes the tools tolerate self-signed or untrusted cluster certificates, and it also avoids the v1.x client error `HTTP protocol is not allowed when skipTLSVerify is not set or false` when a cluster's `server:` URL uses plain `http://`.
+
+To opt back in to normal certificate verification, set the `KUBE_VERIFY_TLS` environment variable:
+
+```bash
+KUBE_VERIFY_TLS=true node src/getpods.js
+```
+
+> **Security note:** Skipping verification means the client will not detect a man-in-the-middle or an unexpected server certificate. It is convenient for self-managed/dev clusters; set `KUBE_VERIFY_TLS=true` when talking to clusters where you want the certificate enforced.
+
 > **Note:** Values that contain spaces or special characters should be quoted in your shell, e.g. `value="my long string"`. The `editdeployment.js` script additionally strips leading/trailing double-quotes from values automatically.
 
 ---
@@ -485,3 +497,5 @@ node src/scaledeployment.js namespace=production deploymentname=my-api replicas=
 | `422 Unprocessable Entity` in `debug.js` | `EphemeralContainers` feature gate not enabled | Enable the feature gate or upgrade to Kubernetes ≥ 1.23 (enabled by default) |
 | Patch fails with no error message | `replicas` or `value` is missing/invalid | Check that all required `key=value` args are provided |
 | Shell session closes immediately | Pod's shell binary not found | Try `shellcommand=/bin/bash` or `shellcommand=/bin/sh` |
+| `HTTP protocol is not allowed when skipTLSVerify is not set or false` | kubeconfig `server:` uses plain `http://` | Scripts skip TLS verification by default, so this should not occur. If you set `KUBE_VERIFY_TLS=true`, either switch the server URL to `https://` or unset `KUBE_VERIFY_TLS` |
+| Certificate errors (`self-signed certificate`, `unable to verify`) | Cluster uses an untrusted/self-signed cert | Scripts skip verification by default. If you enabled `KUBE_VERIFY_TLS=true`, add the cluster CA to your kubeconfig or unset the variable |

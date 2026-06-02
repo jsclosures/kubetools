@@ -1,7 +1,7 @@
 //
 // Execute commands non-interactively in a pod
 //
-const { init } = require("./lib");
+const { init, verifyTlsRequested } = require("./lib");
 
 init({
   name: "doexec.js",
@@ -18,7 +18,14 @@ const config = require('kubernetes-client').config
 
 async function main () {
   try {
-    const client = new Client({ config: config.fromKubeconfig(), version: '1.13' })
+    const cfg = config.fromKubeconfig()
+    // Skip TLS certificate verification by default, consistent with the other
+    // scripts. Set KUBE_VERIFY_TLS=true (or 1/yes) to enforce verification.
+    if (!verifyTlsRequested()) {
+      cfg.insecureSkipTlsVerify = true
+      delete cfg.ca
+    }
+    const client = new Client({ config: cfg, version: '1.13' })
 
     // Pod with single container
     let res = await client.api.v1.namespaces('namespace_name').pods('pod_name').exec.post({

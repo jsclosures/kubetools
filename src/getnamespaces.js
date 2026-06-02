@@ -18,6 +18,7 @@ async function listNamespaces() {
         // Load Kubernetes configuration from default locations (e.g., ~/.kube/config)
         const kc = new k8s.KubeConfig();
         kc.loadFromDefault();
+        require("./lib").skipTlsVerify(kc);
 
         // Create an API client for CoreV1Api (which handles namespaces)
         const k8sApi = kc.makeApiClient(k8s.CoreV1Api);

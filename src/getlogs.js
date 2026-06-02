@@ -5,6 +5,7 @@ async function getPods(ctx) {
     let namespace = ctx.namespace;
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
+require("./lib").skipTlsVerify(kc);
 
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
@@ -27,6 +28,7 @@ async function getPodLogs(ctx,podName, namespace, containerName = null) {
     try {
         const kc = new k8s.KubeConfig();
         kc.loadFromDefault(); // Loads configuration from ~/.kube/config or environment variables
+        require("./lib").skipTlsVerify(kc);
 
         const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 

@@ -7,6 +7,32 @@
 //   - same usage / help message format
 //
 
+// Force the loaded kubeconfig to skip TLS certificate verification for every
+// cluster. Call this right after kc.loadFromDefault(). This makes the scripts
+// tolerate self-signed / untrusted cluster certificates by default, and also
+// avoids the v1.x client error "HTTP protocol is not allowed when skipTLSVerify
+// is not set or false" for plain-http servers.
+//
+// Set the environment variable KUBE_VERIFY_TLS=true (or 1/yes) to opt back in to
+// normal certificate verification.
+function verifyTlsRequested() {
+    const v = String(process.env.KUBE_VERIFY_TLS || "").trim().toLowerCase();
+    return v === "true" || v === "1" || v === "yes";
+}
+
+function skipTlsVerify(kc) {
+    if (verifyTlsRequested()) {
+        return kc;
+    }
+    if (!kc || !Array.isArray(kc.clusters)) {
+        return kc;
+    }
+    // Cluster objects are typed readonly, so replace each with a copy that has
+    // skipTLSVerify enabled rather than mutating in place.
+    kc.clusters = kc.clusters.map((c) => Object.assign({}, c, { skipTLSVerify: true }));
+    return kc;
+}
+
 function wantsHelp(argv) {
     argv = argv || process.argv.slice(2);
     return argv.some((a) => a === "-h" || a === "--help" || a === "help");
@@ -96,4 +122,4 @@ function init(spec) {
     return applyArgs(spec.context || {});
 }
 
-module.exports = { wantsHelp, applyArgs, formatUsage, printUsage, init };
+module.exports = { wantsHelp, applyArgs, formatUsage, printUsage, init, skipTlsVerify, verifyTlsRequested };

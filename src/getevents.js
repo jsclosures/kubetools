@@ -8,6 +8,7 @@ async function getKubernetesEvents(namespace) {
     // Load configuration from default locations (e.g., ~/.kube/config)
 
     kc.loadFromDefault(); 
+    require("./lib").skipTlsVerify(kc);
     //kc.setCurrentContext('phc-fusion-tst-aks-01');
 
     // Create an API client for the CoreV1Api, which handles events

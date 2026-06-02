@@ -5,6 +5,7 @@ const yaml = require('js-yaml');
 // Function to load the kubeconfig from default location
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
+require("./lib").skipTlsVerify(kc);
 
 // Create API clients for CoreV1 (e.g., Pods, Services) and AppsV1 (e.g., Deployments) APIs
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
