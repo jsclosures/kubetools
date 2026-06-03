@@ -41,12 +41,10 @@ async function rolloutRestart(ctx) {
 
     try {
         console.log(`Restarting deployment ${deploymentname} in namespace ${namespace} (restartedAt=${restartedAt})...`);
-        await k8sApi.patchNamespacedDeployment({
-            name: deploymentname,
-            namespace,
-            body: patch,
-            options: { headers: { 'content-type': 'application/strategic-merge-patch+json' } }
-        });
+        await k8sApi.patchNamespacedDeployment(
+            { name: deploymentname, namespace, body: patch },
+            k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.StrategicMergePatch)
+        );
         console.log(`Successfully triggered a rolling restart of deployment ${deploymentname}.`);
     } catch (err) {
         console.error('Error restarting deployment:', err.body || err);
