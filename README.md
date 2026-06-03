@@ -21,6 +21,7 @@ Run `node src/index.js` to print a catalog of every available script.
   - [getnamespaces.js — List namespaces](#getnamespacesjs--list-namespaces)
   - [getpods.js — List pods in a namespace](#getpodsjs--list-pods-in-a-namespace)
   - [scaledeployment.js — Scale a deployment or StatefulSet](#scaledeploymentjs--scale-a-deployment-or-statefulset)
+  - [rolloutrestart.js — Rolling-restart a deployment](#rolloutrestartjs--rolling-restart-a-deployment)
 - [Common Patterns](#common-patterns)
 - [Troubleshooting](#troubleshooting)
 
@@ -436,6 +437,33 @@ node src/scaledeployment.js \
 ```
 
 > **Note:** `replicas` is parsed as an integer with `parseInt`. Passing a non-numeric value will result in `NaN` and the API call will likely fail with a validation error.
+
+---
+
+### `rolloutrestart.js` — Rolling-restart a deployment
+
+**Equivalent to:** `kubectl rollout restart deployment <name> -n <namespace>`
+
+Triggers a rolling restart of a Deployment. Like `kubectl`, it stamps a `kubectl.kubernetes.io/restartedAt` annotation (with the current timestamp) onto the pod template. Changing the template starts a new rollout, restarting the pods in batches according to the Deployment's rolling-update strategy. A strategic-merge patch is used so the annotation is merged in without disturbing any existing template annotations.
+
+**Default context values:**
+
+| Key | Default |
+|---|---|
+| `namespace` | `ns-dev` |
+| `deploymentname` | *(empty — required)* |
+
+**Usage:**
+
+```bash
+# Restart a deployment in the default namespace
+node src/rolloutrestart.js deploymentname=my-deploy
+
+# Restart a deployment in another namespace
+node src/rolloutrestart.js namespace=production deploymentname=my-api
+```
+
+> **Note:** `deploymentname` is required; running without it prints an error. The restart is asynchronous — the command returns once the rollout is triggered, not when all pods have finished restarting.
 
 ---
 

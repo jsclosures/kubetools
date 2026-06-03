@@ -20,6 +20,7 @@ const COMMANDS = [
     ["describestatefulset.js", "Describe (read) a single StatefulSet."],
     ["hpa.js", "Describe a HorizontalPodAutoscaler."],
     ["scaledeployment.js", "Scale a Deployment or StatefulSet to a replica count."],
+    ["rolloutrestart.js", "Rolling-restart a Deployment (like 'kubectl rollout restart')."],
     ["editdeployment.js", "Patch a Deployment with a single JSON Patch operation."],
     ["editstatefulset.js", "Patch a StatefulSet with a single JSON Patch operation."],
     ["editpvc.js", "Patch a PersistentVolumeClaim (e.g. grow storage)."],
