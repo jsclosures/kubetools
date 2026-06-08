@@ -24,6 +24,13 @@ const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 }
 
 
+// Parse a truthy flag value (true/1/yes, case-insensitive) the same way the
+// rest of the toolkit interprets boolean-ish options.
+function isTruthy(value) {
+    const v = String(value || "").trim().toLowerCase();
+    return v === "true" || v === "1" || v === "yes";
+}
+
 async function getPodLogs(ctx,podName, namespace, containerName = null) {
     try {
         const kc = new k8s.KubeConfig();
@@ -32,32 +39,26 @@ async function getPodLogs(ctx,podName, namespace, containerName = null) {
 
         const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
-        const logOptions = {
-            follow: false, // Set to true for streaming logs
-            tailLines: 100, // Get the last 100 lines
-            timestamps: true, // Include timestamps
-            previous: false, // Get logs from a previous terminated container (if applicable)
-        };
+        // Equivalent to `kubectl logs --previous`: read logs from the previously
+        // terminated instance of the container instead of the running one.
+        const previous = isTruthy(ctx.previous);
 
-        if (containerName) {
-            logOptions.container = containerName;
-        }
-
-	    //const logStream = await k8sApi.readNamespacedPodLog(podName, namespace, containerName, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, logOptions.tailLines, logOptions.timestamps, logOptions.follow, logOptions.previous);
+            //const logStream = await k8sApi.readNamespacedPodLog(podName, namespace, containerName, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, logOptions.tailLines, logOptions.timestamps, logOptions.follow, logOptions.previous);
         const args = {"name": podName, "namespace": namespace};
-	if( containerName ){
-		args.container = containerName;
-	}
+        if( containerName ){
+                args.container = containerName;
+        }
 
         const logStream = await k8sApi.readNamespacedPodLog(args,{
     follow: false,
     pretty: false,
     timestamps: false,
-    tailLines: 100
+    tailLines: 100,
+    previous: previous
 });
-	    console.log("response",typeof logStream);
+            console.log("response",typeof logStream);
         let logs = logStream; 
-	if( typeof logStream != 'string' ){
+        if( typeof logStream != 'string' ){
         // For non-streaming logs (follow: false)
         logs = await new Promise((resolve, reject) => {
             let data = '';
@@ -71,14 +72,14 @@ async function getPodLogs(ctx,podName, namespace, containerName = null) {
                 reject(err);
             });
         });
-	}
+        }
         if( ctx.filename ){
             fs.writeFileSync(podName + '.txt', logs, 'utf8');
-	}
+        }
         else {
            console.log(`Logs for pod ${podName} in namespace ${namespace}:`);
            console.log(logs);
-	}
+        }
 
     } catch (err) {
         console.error('Error fetching pod logs:', err);
@@ -91,6 +92,7 @@ CONTEXT.namespace = "ns-dev";
 CONTEXT.podname = "";
 CONTEXT.containername = "";
 CONTEXT.file = "out.log";
+CONTEXT.previous = "";
 
 const { init } = require("./lib");
 
@@ -102,10 +104,12 @@ const USAGE = {
             "namespace": "Namespace to query.",
             "podname": "Pod name, or * for all pods in the namespace.",
             "containername": "Container to read logs from.",
-            "file": "Output file for the logs."
+            "file": "Output file for the logs.",
+            "previous": "Set true/1/yes to read logs from the previously terminated container (kubectl logs --previous)."
         },
         "examples": [
-            "node src/getlogs.js namespace=ns-dev podname=my-pod-0 file=out.log"
+            "node src/getlogs.js namespace=ns-dev podname=my-pod-0 file=out.log",
+            "node src/getlogs.js namespace=ns-dev podname=my-pod-0 previous=true"
         ]
     };
 
@@ -116,12 +120,12 @@ init(USAGE);
 (async () => {
 if( CONTEXT.podname == "*" ){
     let pods = await getPods(CONTEXT);
-	console.log(pods);
+        console.log(pods);
     if( pods ){
        pods.forEach((item) => getPodLogs(CONTEXT,item,CONTEXT.namespace,null));     
     }
     else {
-	    console.log("no pods",CONTEXT);
+            console.log("no pods",CONTEXT);
    }
 } else if( CONTEXT.containername ){
      getPodLogs(CONTEXT,CONTEXT.podname, CONTEXT.namespace,CONTEXT.containername); 

@@ -22,6 +22,7 @@ Run `node src/index.js` to print a catalog of every available script.
   - [getpods.js — List pods in a namespace](#getpodsjs--list-pods-in-a-namespace)
   - [scaledeployment.js — Scale a deployment or StatefulSet](#scaledeploymentjs--scale-a-deployment-or-statefulset)
   - [rolloutrestart.js — Rolling-restart a deployment](#rolloutrestartjs--rolling-restart-a-deployment)
+  - [forward.js — Port-forward to a service or pod](#forwardjs--port-forward-to-a-service-or-pod)
 - [Common Patterns](#common-patterns)
 - [Troubleshooting](#troubleshooting)
 
@@ -464,6 +465,45 @@ node src/rolloutrestart.js namespace=production deploymentname=my-api
 ```
 
 > **Note:** `deploymentname` is required; running without it prints an error. The restart is asynchronous — the command returns once the rollout is triggered, not when all pods have finished restarting.
+
+---
+
+### `forward.js` — Port-forward to a service or pod
+
+**Equivalent to:** `kubectl port-forward service/<name> <localport>:<port>` (and `kubectl port-forward pod/<name> ...`)
+
+Opens a local TCP listener and forwards connections into the cluster. Pass a `servicename` to forward to a Service: the script resolves the Service's selector to a backing pod (preferring a `Running` one) and derives the remote pod port from the Service's `targetPort`. Named target ports are resolved against the chosen pod's container ports. Alternatively, pass a `podname` to forward straight to a pod.
+
+This is a **long-running** command — it stays in the foreground until you stop it with Ctrl+C. The listener binds to `127.0.0.1` only.
+
+**Default context values:**
+
+| Key | Default |
+|---|---|
+| `namespace` | `ns-dev` |
+| `servicename` | *(empty)* |
+| `podname` | *(empty — takes precedence over `servicename`; requires `targetport`)* |
+| `serviceport` | *(empty — defaults to the first service port)* |
+| `targetport` | *(empty — derived from the service; required with `podname`)* |
+| `localport` | *(empty — defaults to the resolved remote port)* |
+
+**Usage:**
+
+```bash
+# Forward to a service (local port defaults to the resolved remote port)
+node src/forward.js servicename=my-svc
+
+# Forward to a service, choosing the local port
+node src/forward.js servicename=my-svc localport=8080
+
+# Pick a specific service port when the service exposes several
+node src/forward.js servicename=my-svc serviceport=443 localport=8443
+
+# Forward directly to a pod (targetport is required)
+node src/forward.js podname=my-pod-0 targetport=8080 localport=8080
+```
+
+> **Note:** You must provide either `servicename` or `podname`. When using `podname`, `targetport` is required (there is no service to derive it from). If a service has no selector or no backing pods, the script errors and asks you to target a pod directly.
 
 ---
 
