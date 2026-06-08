@@ -12,12 +12,14 @@ Run `node src/index.js` to print a catalog of every available script.
 - [Installation](#installation)
 - [How Arguments Work](#how-arguments-work)
 - [Scripts](#scripts)
+  - [All scripts at a glance](#all-scripts-at-a-glance)
   - [apply.js — Apply YAML resources](#applyjs--apply-yaml-resources)
   - [describe.js — Describe a deployment](#describejs--describe-a-deployment)
   - [editdeployment.js — Patch a deployment](#editdeploymentjs--patch-a-deployment)
   - [exec.js — Open a shell in a pod](#execjs--open-a-shell-in-a-pod)
   - [debug.js — Attach an ephemeral debug container](#debugjs--attach-an-ephemeral-debug-container)
   - [getevents.js — List namespace events](#geteventsjs--list-namespace-events)
+  - [getlogs.js — Fetch pod logs](#getlogsjs--fetch-pod-logs)
   - [getnamespaces.js — List namespaces](#getnamespacesjs--list-namespaces)
   - [getpods.js — List pods in a namespace](#getpodsjs--list-pods-in-a-namespace)
   - [scaledeployment.js — Scale a deployment or StatefulSet](#scaledeploymentjs--scale-a-deployment-or-statefulset)
@@ -107,6 +109,45 @@ KUBE_VERIFY_TLS=true node src/getpods.js
 ---
 
 ## Scripts
+
+### All scripts at a glance
+
+The complete toolkit. Run `node src/index.js` to print this catalog from the command line. Scripts with a dedicated section below are linked.
+
+| Script | Purpose |
+|---|---|
+| **List / read** | |
+| [`getnamespaces.js`](#getnamespacesjs--list-namespaces) | List all namespaces in the cluster. |
+| [`getpods.js`](#getpodsjs--list-pods-in-a-namespace) | List pods in a namespace. |
+| `getpod.js` | Read a single pod. |
+| `getdeployments.js` | List Deployments in a namespace. |
+| `getstatefulsets.js` | List StatefulSets in a namespace. |
+| `getpvcs.js` | List PersistentVolumeClaims in a namespace. |
+| [`getevents.js`](#geteventsjs--list-namespace-events) | List events in a namespace. |
+| `getpodevents.js` | List events in a namespace, scoped around a pod. |
+| [`getlogs.js`](#getlogsjs--fetch-pod-logs) | Fetch and print pod logs (`podname=*` for all pods; `previous=true` for the prior instance). |
+| [`describe.js`](#describejs--describe-a-deployment) | Describe (read) a single Deployment. |
+| `describestatefulset.js` | Describe (read) a single StatefulSet. |
+| `hpa.js` | Describe a HorizontalPodAutoscaler. |
+| **Scale / restart** | |
+| [`scaledeployment.js`](#scaledeploymentjs--scale-a-deployment-or-statefulset) | Scale a Deployment or StatefulSet to a replica count. |
+| [`rolloutrestart.js`](#rolloutrestartjs--rolling-restart-a-deployment) | Rolling-restart a Deployment (like `kubectl rollout restart`). |
+| **Edit / patch** | |
+| [`editdeployment.js`](#editdeploymentjs--patch-a-deployment) | Patch a Deployment with a single JSON Patch operation. |
+| `editstatefulset.js` | Patch a StatefulSet with a single JSON Patch operation. |
+| `editpvc.js` | Patch a PersistentVolumeClaim (e.g. grow storage). |
+| `edithpa.js` | Patch an HPA: min/max replicas and target CPU utilization. |
+| **Interact** | |
+| [`exec.js`](#execjs--open-a-shell-in-a-pod) | Open an interactive shell in a pod container. |
+| [`debug.js`](#debugjs--attach-an-ephemeral-debug-container) | Attach (or remove) an ephemeral debug container on a pod. |
+| [`forward.js`](#forwardjs--port-forward-to-a-service-or-pod) | Port-forward a local port to a Service or pod. |
+| [`apply.js`](#applyjs--apply-yaml-resources) | Apply (replace) a resource from a YAML manifest file. |
+| `doexec.js` | Example: run a command non-interactively in a pod (hard-coded sample). |
+| **Helpers** | |
+| `index.js` | Print the catalog of all available scripts. |
+| `lib.js` | Shared module (argument parsing, help text, TLS skip) — not run directly. |
+| `scaleup.sh` | Bulk-scale a preset list of Deployments/StatefulSets **up** for a namespace: `cd src && ./scaleup.sh <namespace>`. |
+| `scaledown.sh` | Bulk-scale that same preset list **down to zero**: `cd src && ./scaledown.sh <namespace>`. |
 
 ---
 
@@ -275,6 +316,8 @@ Injects an ephemeral container into a running pod. The container runs `sleep inf
 | `podname` | `ns-test-solr-0` |
 | `debugimage` | `busybox` |
 | `debugcontainername` | `debugger` |
+| `targetcontainername` | `debugger` |
+| `remove` | *(empty — set `true`/`1`/`yes` to remove instead of add)* |
 
 **Usage:**
 
@@ -298,6 +341,20 @@ node src/exec.js \
   podname=<podname> \
   containername=<debugcontainername>
 ```
+
+**Removing the debug container:**
+
+Pass `remove=true` to remove the ephemeral container named by `debugcontainername`:
+
+```bash
+node src/debug.js \
+  namespace=ns-dev \
+  podname=my-pod-0 \
+  debugcontainername=debugger \
+  remove=true
+```
+
+> **Important:** Kubernetes generally does **not** allow removing ephemeral containers from a running pod — the `ephemeralContainers` subresource only permits additions. This switch is best-effort: it attempts the removal and, if the API server rejects it (the usual case), prints a note explaining that the pod must be recreated (e.g. delete the pod and let its controller recreate it) to fully clear the container. If the named container is not present, the script reports it and exits non-zero.
 
 **Error handling:**
 
@@ -337,6 +394,43 @@ Kubernetes Events in "production" namespace:
  - Type: Warning, Reason: BackOff, Message: Back-off restarting failed container, Involved Object: Pod/my-api-abc
  - Type: Normal, Reason: Pulled, Message: Successfully pulled image "my-image:latest", Involved Object: Pod/my-api-def
 ```
+
+---
+
+### `getlogs.js` — Fetch pod logs
+
+**Equivalent to:** `kubectl logs <pod> [-c <container>] [--previous]`
+
+Fetches the last 100 log lines from a pod and prints them to stdout. Pass `podname=*` to fetch logs from **all** pods in the namespace (the script lists them first, then reads each one). Use `containername` to read a specific container in a multi-container pod.
+
+**Default context values:**
+
+| Key | Default |
+|---|---|
+| `namespace` | `ns-dev` |
+| `podname` | *(empty — or `*` for all pods in the namespace)* |
+| `containername` | *(empty — defaults to the pod's default container)* |
+| `previous` | *(empty — set `true`/`1`/`yes` to read the previous container instance)* |
+
+> **Note:** Logs are printed to stdout; redirect to a file with your shell (e.g. `node src/getlogs.js podname=my-pod-0 > out.log`).
+
+**Usage:**
+
+```bash
+# Fetch logs from a single pod
+node src/getlogs.js namespace=ns-dev podname=my-pod-0
+
+# Fetch logs from a specific container
+node src/getlogs.js namespace=ns-dev podname=my-pod-0 containername=app
+
+# Fetch logs from all pods in the namespace
+node src/getlogs.js namespace=ns-dev podname=*
+
+# Read logs from the previously terminated container (crash debugging)
+node src/getlogs.js namespace=ns-dev podname=my-pod-0 previous=true
+```
+
+> **Note:** `previous=true` is equivalent to `kubectl logs --previous` — it reads logs from the previously terminated instance of the container, which is useful for diagnosing a pod that crashed and restarted. If the container has no prior terminated instance, the cluster returns an error (same behavior as `kubectl`).
 
 ---
 

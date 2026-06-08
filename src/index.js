@@ -15,7 +15,7 @@ const COMMANDS = [
     ["getpvcs.js", "List PersistentVolumeClaims in a namespace."],
     ["getevents.js", "List events in a namespace."],
     ["getpodevents.js", "List events in a namespace (scoped around a pod)."],
-    ["getlogs.js", "Fetch pod logs (podname=* for all pods) and write them to a file."],
+    ["getlogs.js", "Fetch and print pod logs (podname=* for all pods)."],
     ["describe.js", "Describe (read) a single Deployment."],
     ["describestatefulset.js", "Describe (read) a single StatefulSet."],
     ["hpa.js", "Describe a HorizontalPodAutoscaler."],
